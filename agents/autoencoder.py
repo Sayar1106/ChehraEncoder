@@ -60,7 +60,6 @@ class AutoEncoder(nn.Module):
         encoder_layers.append(nn.Flatten())
         encoder_layers.append(nn.Linear(x.shape[1], self.z_dim))
 
-
         for i in range(1, len(self.decoder_conv_t_strides)):
             decoder_layer = []
             decoder_layer.extend(
@@ -69,9 +68,11 @@ class AutoEncoder(nn.Module):
                         in_channels=self.decoder_conv_t_filters[i - 1],
                         out_channels=self.decoder_conv_t_filters[i],
                         kernel_size=self.decoder_conv_t_kernel_size[i],
-                        stride=self.decoder_conv_t_strides[i]
+                        stride=self.decoder_conv_t_strides[i],
                     ),
-                    nn.Sigmoid() if i == len(self.decoder_conv_t_filters) - 2 else nn.LeakyReLU()
+                    nn.Sigmoid()
+                    if i == len(self.decoder_conv_t_filters) - 2
+                    else nn.LeakyReLU(),
                 ]
             )
             decoder_layers.append(nn.Sequential(*decoder_layer))
@@ -91,7 +92,9 @@ class AutoEncoder(nn.Module):
 
 
 if __name__ == "__main__":
-    train_ds = datasets.MNIST(root='./data/', train=True, transform=transforms.ToTensor(), download=True)
+    train_ds = datasets.MNIST(
+        root="./data/", train=True, transform=transforms.ToTensor(), download=True
+    )
     model = AutoEncoder(
         x_0=train_ds[0][0][None],
         input_dim=(28, 28, 1),
