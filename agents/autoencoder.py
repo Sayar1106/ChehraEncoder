@@ -1,8 +1,6 @@
 import numpy as np
 import torch.nn as nn
-from torch.nn import functional as F
 from torch.nn.modules.conv import Conv2d
-from torch.optim import Adam
 from torchvision import datasets, transforms
 
 
@@ -82,8 +80,6 @@ class AutoEncoder(nn.Module):
         self.decoder_layers = nn.Sequential(*decoder_layers)
 
     def forward(self, x):
-
-        # x = self.decoder_input_layer(x)
         x = self.encoder_layers(x)
         x = self.fc1()(x)
         x = x.view(x.shape[0], *x.shape[1:])
