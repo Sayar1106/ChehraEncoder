@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.nn.modules.conv import Conv2d
 from torchvision import datasets, transforms
 
-
 class AutoEncoder(nn.Module):
     def __init__(
         self,
@@ -12,9 +11,12 @@ class AutoEncoder(nn.Module):
         encoder_conv_filters,
         encoder_conv_kernel_size,
         encoder_conv_strides,
+        encoder_padding,
         decoder_conv_t_filters,
         decoder_conv_t_kernel_size,
         decoder_conv_t_strides,
+        decoder_padding,
+        decoder_output_padding,
         z_dim,
         use_batch_norm=False,
         use_dropout=False,
@@ -25,9 +27,12 @@ class AutoEncoder(nn.Module):
         self.encoder_conv_filters = encoder_conv_filters
         self.encoder_conv_kernel_size = encoder_conv_kernel_size
         self.encoder_conv_strides = encoder_conv_strides
+        self.encoder_padding = encoder_padding
         self.decoder_conv_t_filters = decoder_conv_t_filters
         self.decoder_conv_t_kernel_size = decoder_conv_t_kernel_size
         self.decoder_conv_t_strides = decoder_conv_t_strides
+        self.decoder_padding = decoder_padding
+        self.decoder_output_padding = decoder_output_padding
 
         self.z_dim = z_dim
 
@@ -46,61 +51,45 @@ class AutoEncoder(nn.Module):
                         out_channels=self.encoder_conv_filters[i],
                         kernel_size=self.encoder_conv_kernel_size[i],
                         stride=self.encoder_conv_strides[i],
+                        padding=self.encoder_padding[i]
                     ),
                     nn.LeakyReLU(),
                 ]
             )
             encoder_layers.append(nn.Sequential(*encoder_layer))
         x = nn.Sequential(*encoder_layers)(x_0)
-        shape_pre_flatten = x.shape
+        self.shape_pre_flatten = x.shape
         x = nn.Flatten()(x)
 
         encoder_layers.append(nn.Flatten())
         encoder_layers.append(nn.Linear(x.shape[1], self.z_dim))
 
-        for i in range(1, len(self.decoder_conv_t_strides)):
+        for i in range(1, len(self.decoder_conv_t_filters)):
+            print(i)
             decoder_layer = []
             decoder_layer.extend(
                 [
                     nn.ConvTranspose2d(
                         in_channels=self.decoder_conv_t_filters[i - 1],
                         out_channels=self.decoder_conv_t_filters[i],
-                        kernel_size=self.decoder_conv_t_kernel_size[i],
-                        stride=self.decoder_conv_t_strides[i],
+                        kernel_size=self.decoder_conv_t_kernel_size[i - 1],
+                        stride=self.decoder_conv_t_strides[i - 1],
+                        padding=self.decoder_padding[i - 1],
+                        output_padding=self.decoder_output_padding[i - 1]
                     ),
                     nn.Sigmoid()
-                    if i == len(self.decoder_conv_t_filters) - 2
+                    if i == len(self.decoder_conv_t_filters) - 1
                     else nn.LeakyReLU(),
                 ]
             )
             decoder_layers.append(nn.Sequential(*decoder_layer))
 
         self.encoder_layers = nn.Sequential(*encoder_layers)
-        self.fc1 = nn.Linear(self.z_dim, np.prod(shape_pre_flatten[1:]))
+        self.fc2 = nn.Linear(self.z_dim, np.prod(self.shape_pre_flatten[1:]))
         self.decoder_layers = nn.Sequential(*decoder_layers)
 
     def forward(self, x):
         x = self.encoder_layers(x)
-        x = self.fc1()(x)
-        x = x.view(x.shape[0], *x.shape[1:])
-
-        return self.decoder_layer(x)
-
-
-if __name__ == "__main__":
-    train_ds = datasets.MNIST(
-        root="./data/", train=True, transform=transforms.ToTensor(), download=True
-    )
-    model = AutoEncoder(
-        x_0=train_ds[0][0][None],
-        input_dim=(28, 28, 1),
-        encoder_conv_filters=[32, 64, 64, 64],
-        encoder_conv_kernel_size=[3, 3, 3, 3],
-        encoder_conv_strides=[1, 2, 2, 1],
-        decoder_conv_t_filters=[64, 64, 32, 1],
-        decoder_conv_t_kernel_size=[3, 3, 3, 3],
-        decoder_conv_t_strides=[1, 2, 2, 1],
-        z_dim=2,
-    )
-
-    print(model)
+        x = self.fc2(x)
+        x = x.view(x.shape[0], *self.shape_pre_flatten[1:])
+        return self.decoder_layers(x)
