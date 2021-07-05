@@ -33,6 +33,8 @@ class AutoEncoder(nn.Module):
         self.decoder_conv_t_strides = decoder_conv_t_strides
         self.decoder_padding = decoder_padding
         self.decoder_output_padding = decoder_output_padding
+        self.use_batch_norm = use_batch_norm
+        self.use_dropout = use_dropout
 
         self.z_dim = z_dim
 
@@ -55,7 +57,13 @@ class AutoEncoder(nn.Module):
                     ),
                     nn.LeakyReLU(),
                 ]
-            )
+            ) 
+            
+            if self.use_batch_norm:
+                encoder_layer.append(nn.BatchNorm2d(self.encoder_conv_filters[i]))
+            if self.use_dropout:
+                encoder_layer.append(nn.Dropout(0.25))
+                
             encoder_layers.append(nn.Sequential(*encoder_layer))
         x = nn.Sequential(*encoder_layers)(x_0)
         self.shape_pre_flatten = x.shape
@@ -65,7 +73,6 @@ class AutoEncoder(nn.Module):
         encoder_layers.append(nn.Linear(x.shape[1], self.z_dim))
 
         for i in range(1, len(self.decoder_conv_t_filters)):
-            print(i)
             decoder_layer = []
             decoder_layer.extend(
                 [
@@ -77,11 +84,18 @@ class AutoEncoder(nn.Module):
                         padding=self.decoder_padding[i - 1],
                         output_padding=self.decoder_output_padding[i - 1]
                     ),
-                    nn.Sigmoid()
-                    if i == len(self.decoder_conv_t_filters) - 1
-                    else nn.LeakyReLU(),
+                    
                 ]
             )
+
+            if i == len(self.decoder_conv_t_filters) - 1:
+                decoder_layer.append(nn.Sigmoid())
+            else:
+                decoder_layer.append(nn.LeakyReLU())
+                if self.use_batch_norm:
+                    decoder_layer.append(nn.BatchNorm2d(self.decoder_conv_t_filters[i]))
+                if self.use_dropout:
+                    decoder_layer.append(nn.Dropout(0.25))
             decoder_layers.append(nn.Sequential(*decoder_layer))
 
         self.encoder_layers = nn.Sequential(*encoder_layers)
