@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.nn.modules.conv import Conv2d
 from torchvision import datasets, transforms
 
+
 class AutoEncoder(nn.Module):
     def __init__(
         self,
@@ -51,17 +52,17 @@ class AutoEncoder(nn.Module):
                         out_channels=self.encoder_conv_filters[i],
                         kernel_size=self.encoder_conv_kernel_size[i],
                         stride=self.encoder_conv_strides[i],
-                        padding=self.encoder_padding[i]
+                        padding=self.encoder_padding[i],
                     ),
                     nn.LeakyReLU(),
                 ]
-            ) 
-            
+            )
+
             if self.use_batch_norm:
                 encoder_layer.append(nn.BatchNorm2d(self.encoder_conv_filters[i]))
             if self.use_dropout:
                 encoder_layer.append(nn.Dropout(0.25))
-                
+
             encoder_layers.append(nn.Sequential(*encoder_layer))
         x = nn.Sequential(*encoder_layers)(x_0)
         self.shape_pre_flatten = x.shape
@@ -80,9 +81,8 @@ class AutoEncoder(nn.Module):
                         kernel_size=self.decoder_conv_t_kernel_size[i - 1],
                         stride=self.decoder_conv_t_strides[i - 1],
                         padding=self.decoder_padding[i - 1],
-                        output_padding=self.decoder_output_padding[i - 1]
+                        output_padding=self.decoder_output_padding[i - 1],
                     ),
-                    
                 ]
             )
 
