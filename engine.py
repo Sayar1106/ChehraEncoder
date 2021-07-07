@@ -37,15 +37,15 @@ def create_model_architecture(
 
 
 def train_autoencoder(
+    train_data = datasets.MNIST(
+        root="./data/", train=True, transform=transforms.ToTensor(), download=True
+    ),
     batch_size=128,
     device="cuda",
     learning_rate=1e-5,
     betas=(0.9, 0.99),
     weight_decay=1e-2,
 ):
-    train_data = datasets.MNIST(
-        root="./data/", train=True, transform=transforms.ToTensor(), download=True
-    )
     dataloader = DataLoader(
         dataset=train_data, batch_size=batch_size, shuffle=True, drop_last=True
     )
