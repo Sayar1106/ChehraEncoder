@@ -53,3 +53,5 @@ def train_autoencoder(
             optimizer.step()
             if i % 50 == 0:
                 print(f"Loss: {loss}")
+    
+    return model
