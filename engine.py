@@ -6,21 +6,35 @@ from tqdm import tqdm
 
 from agents.autoencoder import AutoEncoder
 
-def create_model_architecture(train_example, enc_conv_f, enc_conv_ks, enc_conv_s, enc_p, 
-dec_conv_t_f, dec_conv_t_ks, dec_conv_t_p, dec_conv_t_s, dec_p, dec_out_p, z_dim):
+
+def create_model_architecture(
+    train_example,
+    enc_conv_f,
+    enc_conv_ks,
+    enc_conv_s,
+    enc_p,
+    dec_conv_t_f,
+    dec_conv_t_ks,
+    dec_conv_t_s,
+    dec_p,
+    dec_out_p,
+    z_dim,
+):
 
     return AutoEncoder(
-            x_0=train_example,
-            encoder_conv_filters=enc_conv_f,
-            encoder_conv_kernel_size=enc_conv_ks,
-            encoder_conv_strides=enc_conv_s,
-            encoder_padding=enc_p,
-            decoder_conv_t_filters=dec_conv_t_f,
-            decoder_conv_t_kernel_size=dec_conv_t_ks,
-            decoder_padding=dec_p,
-            decoder_output_padding=dec_out_p,
-            z_dim=2,
-        )
+        x_0=train_example,
+        encoder_conv_filters=enc_conv_f,
+        encoder_conv_kernel_size=enc_conv_ks,
+        encoder_conv_strides=enc_conv_s,
+        encoder_padding=enc_p,
+        decoder_conv_t_filters=dec_conv_t_f,
+        decoder_conv_t_kernel_size=dec_conv_t_ks,
+        decoder_conv_t_strides=dec_conv_t_s,
+        decoder_padding=dec_p,
+        decoder_output_padding=dec_out_p,
+        z_dim=z_dim,
+    )
+
 
 def train_autoencoder(
     batch_size=128,
@@ -45,7 +59,7 @@ def train_autoencoder(
         dec_conv_t_f=[64, 64, 64, 32, 1],
         dec_conv_t_ks=[3, 3, 3, 3],
         dec_conv_t_s=[1, 2, 2, 1],
-        dec_out_p=[1, 0, 1, 1],
+        dec_p=[1, 0, 1, 1],
         dec_out_p=[0, 1, 1, 0],
         z_dim=2,
     )
@@ -67,5 +81,5 @@ def train_autoencoder(
             optimizer.step()
             if i % 50 == 0:
                 print(f"Loss: {loss}")
-    
+
     return model
