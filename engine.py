@@ -6,6 +6,21 @@ from tqdm import tqdm
 
 from agents.autoencoder import AutoEncoder
 
+def create_model_architecture(train_example, enc_conv_f, enc_conv_ks, enc_conv_s, enc_p, 
+dec_conv_t_f, dec_conv_t_ks, dec_conv_t_p, dec_conv_t_s, dec_p, dec_out_p, z_dim):
+
+    return AutoEncoder(
+            x_0=train_example,
+            encoder_conv_filters=enc_conv_f,
+            encoder_conv_kernel_size=enc_conv_ks,
+            encoder_conv_strides=enc_conv_s,
+            encoder_padding=enc_p,
+            decoder_conv_t_filters=dec_conv_t_f,
+            decoder_conv_t_kernel_size=dec_conv_t_ks,
+            decoder_padding=dec_p,
+            decoder_output_padding=dec_out_p,
+            z_dim=2,
+        )
 
 def train_autoencoder(
     batch_size=128,
@@ -21,18 +36,17 @@ def train_autoencoder(
         dataset=train_data, batch_size=batch_size, shuffle=True, drop_last=True
     )
 
-    model = AutoEncoder(
-        x_0=train_data[0][0][None],
-        input_dim=(28, 28, 1),
-        encoder_conv_filters=[32, 64, 64, 64],
-        encoder_conv_kernel_size=[3, 3, 3, 3],
-        encoder_conv_strides=[1, 2, 2, 1],
-        encoder_padding=[1, 1, 0, 1],
-        decoder_conv_t_filters=[64, 64, 64, 32, 1],
-        decoder_conv_t_kernel_size=[3, 3, 3, 3],
-        decoder_conv_t_strides=[1, 2, 2, 1],
-        decoder_padding=[1, 0, 1, 1],
-        decoder_output_padding=[0, 1, 1, 0],
+    model = create_model_architecture(
+        training_example=train_data[0][0][None],
+        enc_conv_f=[32, 64, 64, 64],
+        enc_conv_ks=[3, 3, 3, 3],
+        enc_conv_s=[1, 2, 2, 1],
+        enc_p=[1, 1, 0, 1],
+        dec_conv_t_f=[64, 64, 64, 32, 1],
+        dec_conv_t_ks=[3, 3, 3, 3],
+        dec_conv_t_s=[1, 2, 2, 1],
+        dec_out_p=[1, 0, 1, 1],
+        dec_out_p=[0, 1, 1, 0],
         z_dim=2,
     )
     model.cuda(device)

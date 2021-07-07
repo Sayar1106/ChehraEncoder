@@ -7,7 +7,6 @@ class AutoEncoder(nn.Module):
     def __init__(
         self,
         x_0,
-        input_dim,
         encoder_conv_filters,
         encoder_conv_kernel_size,
         encoder_conv_strides,
@@ -23,7 +22,6 @@ class AutoEncoder(nn.Module):
     ):
 
         super(AutoEncoder, self).__init__()
-        self.input_dim = input_dim
         self.encoder_conv_filters = encoder_conv_filters
         self.encoder_conv_kernel_size = encoder_conv_kernel_size
         self.encoder_conv_strides = encoder_conv_strides
