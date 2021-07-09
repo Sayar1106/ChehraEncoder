@@ -24,7 +24,7 @@ class VariationalAutoEncoder(nn.Module):
         use_dropout=False,
     ):
 
-        super(AutoEncoder, self).__init__()
+        super(VariationalAutoEncoder, self).__init__()
         self.encoder_conv_filters = encoder_conv_filters
         self.encoder_conv_kernel_size = encoder_conv_kernel_size
         self.encoder_conv_strides = encoder_conv_strides
