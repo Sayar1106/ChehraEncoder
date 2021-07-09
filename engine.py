@@ -23,6 +23,7 @@ def create_model_architecture(
 
     return AutoEncoder(
         x_0=train_example,
+        input_dim=(28, 28, 1),
         encoder_conv_filters=enc_conv_f,
         encoder_conv_kernel_size=enc_conv_ks,
         encoder_conv_strides=enc_conv_s,
