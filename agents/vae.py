@@ -10,6 +10,7 @@ class VariationalAutoEncoder(nn.Module):
     def __init__(
         self,
         x_0,
+        input_dim,
         encoder_conv_filters,
         encoder_conv_kernel_size,
         encoder_conv_strides,
@@ -25,6 +26,7 @@ class VariationalAutoEncoder(nn.Module):
     ):
 
         super(VariationalAutoEncoder, self).__init__()
+        self.input_dim = input_dim
         self.encoder_conv_filters = encoder_conv_filters
         self.encoder_conv_kernel_size = encoder_conv_kernel_size
         self.encoder_conv_strides = encoder_conv_strides
@@ -38,6 +40,7 @@ class VariationalAutoEncoder(nn.Module):
         self.use_dropout = use_dropout
         self.norm_dist = d.Normal(0, 1)
         self.norm_dist.loc = self.norm_dist.loc.cuda()
+        self.norm_dist.scale = self.norm_dist.scale.cuda()
 
         self.z_dim = z_dim
 
