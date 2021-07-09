@@ -6,7 +6,7 @@ from torch.nn.modules.conv import Conv2d
 from torchvision import datasets, transforms
 
 
-class AutoEncoder(nn.Module):
+class VariationalAutoEncoder(nn.Module):
     def __init__(
         self,
         x_0,
@@ -113,4 +113,5 @@ class AutoEncoder(nn.Module):
         z = mu + torch.exp(log_var / 2) * epsilon
         x = self.fc2(z)
         x = x.view(x.shape[0], *self.shape_pre_flatten[1:])
+
         return self.decoder_layers(x)
