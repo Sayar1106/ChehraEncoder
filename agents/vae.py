@@ -76,8 +76,8 @@ class VariationalAutoEncoder(nn.Module):
         x = nn.Flatten()(x)
 
         encoder_layers.append(nn.Flatten())
-        self.mu = nn.Linear(x.shape[1], self.z_dim)
-        self.log_var = nn.Linear(x.shape[1], self.z_dim)
+        self.encoder_output1 = nn.Linear(x.shape[1], self.z_dim)
+        self.encoder_output2 = nn.Linear(x.shape[1], self.z_dim)
 
         for i in range(1, len(self.decoder_conv_t_filters)):
             decoder_layer = []
@@ -110,10 +110,10 @@ class VariationalAutoEncoder(nn.Module):
 
     def forward(self, x):
         x = self.encoder_layers(x)
-        mu = self.mu(x)
-        log_var = self.log_var(x)
-        epsilon = self.norm_dist.sample(mu.shape)
-        z = mu + torch.exp(log_var / 2) * epsilon
+        self.mu = self.encoder_output1(x)
+        self.log_var = self.encoder_output2(x)
+        epsilon = self.norm_dist.sample(self.mu.shape)
+        z = self.mu + torch.exp(self.log_var / 2) * epsilon
         x = self.fc2(z)
         x = x.view(x.shape[0], *self.shape_pre_flatten[1:])
 
